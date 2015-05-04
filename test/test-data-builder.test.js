@@ -1,6 +1,7 @@
 var loopback = require('loopback');
 var TestDataBuilder = require('../lib/test-data-builder');
 var expect = require('chai').expect;
+var fixtures = require('../lib/fixtures');
 
 describe('TestDataBuilder', function() {
   var db;
@@ -109,13 +110,79 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+  it('creates from fixture', function(done) {
+    var Device = givenModel('Device', { 
+      type: { type: String, required: true },
+      model: { type: String, required: true } 
+    }, 'devices');
+    new TestDataBuilder()
+      .define('device', 'devices', 'dev1')
+      .buildTo(this, function(err) {
+        if(err) return done(err);
+        expect(this.device.name).to.equal(fixtures.devices.dev1.name);
+        expect(this.device.model).to.equal(fixtures.devices.dev1.model);
+        done();
+      }.bind(this));
+  });
+
+  it('manage relations', function(done) {
+    createModels();
+    var options = {timeout: 100000};
+    var ctx={};
+    new TestDataBuilder()
+      .define('cart', 'carts', 'anoncart', options) //options is optional
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.cart.session).to.equal(fixtures.carts.usercart.session);
+        expect(ctx.devices.length).to.equal(3);
+        done();
+      }.bind(this));
+  });
+
+  it('manage indirect relations', function(done) {
+    createModels();
+    var ctx={};
+    new TestDataBuilder()
+      .define('payment', 'payments', 'pm1')
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.payment.cartId).to.equal(ctx.cart.id);
+        expect(ctx.devices.length).to.equal(3);
+        done();
+      }.bind(this));
+  });
+
+  function createModels(){
+    var Device = givenModel('Device', { 
+      type: { type: String, required: true },
+      model: { type: String, required: true },
+      cartId: { type: Number} 
+    }, 'devices');
+    var User = givenModel('User', { 
+      name: { type: String, required: true }
+    }, 'users');
+    var Cart = givenModel('Cart', { 
+      session: { type: String, required: true },
+      userId: { type: Number, required: true },
+      timeout: { type: Number}
+    }, 'carts');    
+    var Payment = givenModel('Payment', { 
+      cardNumber: { type: String, required: true },
+      cartId: { type: Number, required: true },
+      amount: { type: Number, required: true }
+    }, 'payments');    
+  }
+
   function givenTestModel(properties) {
     TestModel = givenModel('TestModel', properties);
   }
 
-  function givenModel(name, properties) {
+  function givenModel(name, properties, mapping) {
     var ModelCtor = loopback.createModel(name, properties);
     ModelCtor.attachTo(db);
+    if(mapping){
+      fixtures.map[mapping]=ModelCtor;
+    }
     return ModelCtor;
   }
 

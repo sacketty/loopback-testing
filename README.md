@@ -7,6 +7,10 @@
 The following helpers are designed to generate [mocha] tests against
 [LoopBack](http://strongloop.com/loopback) apps.
 
+## about this fork
+Developpers coming from rails might be missing usage of fixtures in the [FactoryGirlRails](http://github.com/thoughtbot/factory_girl_rails) way.
+
+This fork is an attempt to implement such a concept, with **belongsTo** and **hasMany** management between fixtures, while keeping compatibility with standard behaviour. 
 ## install
 
 1. `npm install loopback-testing --save-dev`
@@ -102,3 +106,108 @@ new TestDataBuilder()
     //   context.notification
   });
 ```
+
+## building test data from fixtures
+
+Here is how directory structure looks like:
+
++-- server
+|	|--server.js
++-- test
+|   +-- fixtures
+|   |	|-- users.json
+|   |	|-- devices.json
+|	|	|-- carts.json
+|	|	|-- index.js
+|	+-- models
+|	|	|-- devices.test.js
+
+### fixtures
+test/fixtures/users.json:
+```json
+{
+  "bob": {
+    "name": "Bob"
+  },
+  "alice": {
+  	"name": "Alice"
+  }
+}
+```
+test/fixtures/devices.json:
+
+```json
+{
+  "dev1": {
+    "type": "phone",
+    "model": "iPhone6"
+  },
+  "dev2": {
+  	"type": "tablet",
+  	"model": "GalaxyTab2"
+  }
+}
+```
+test/fixtures/carts.json:
+```json
+{
+  "usercart": {
+    "session": "1111122222333333",
+    "user": {
+      "fixture": "users",
+      "value": "bob"
+    },
+    "cart": {
+      "fixture": "devices",
+      "items": {
+        "dev1": 1,
+        "dev2": 2
+      }
+    }
+  }
+}
+```
+test/fixtures/users.js:
+```js
+var app = require('../../server/server.js');
+var _ = require('underscore');
+
+exports.users = require('./users.json');
+exports.devices = require('./devices.json');
+exports.carts = require('./carts.json');
+
+exports.map = {
+	"users": app.models.User,
+	"devices": app.models.Device,
+	"carts": app.models.Carts
+}
+
+**Beware of a gotcha here**
+
+*When using fixture, the node parent should refer to the foreignKey prefix. i.e.
+in carts.json, Cart has a 'hasMany' relation to device. So Device has a 'cartId' foreign key=> the prefix is the 'cart'. this is why we have a "cart" instead of "devices" in the "usercart" fixture definition.*
+
+*I'll try to find a more intuivie implementation for the nex release*
+
+```
+### building test data
+```js
+var TestDataBuilder = require('loopback-testing').TestDataBuilder;
+var ref = TestDataBuilder.ref;
+
+// The context object to hold the created models.
+// You can use `this` in mocha test instead.
+var context = {};
+
+var ref = TestDataBuilder.ref;
+var options = {timeout: 100000};
+new TestDataBuilder()
+  .define('cart', 'carts', 'usercart', options) //options is optional
+  .buildTo(context, function(err) {
+    // test models are available as
+    //   context.cart
+    //   context.user
+    //   context.devices as an array of devices
+  });
+```
+
