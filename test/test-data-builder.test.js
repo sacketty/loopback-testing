@@ -67,6 +67,7 @@ describe('TestDataBuilder', function() {
   }
 
   itAutoFillsRequiredPropertiesWithDefaultValuesFor(String, "defaut Value");
+  itAutoFillsRequiredPropertiesWithDefaultValuesFor(Number, 0);
   itAutoFillsRequiredPropertiesWithDefaultValuesFor(Number, 10);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(String);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(Number);
