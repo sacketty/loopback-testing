@@ -226,10 +226,12 @@ exports.map = {
 *I'll try to find a more intuivie implementation for future release*
 
 
-### building test data
+#### Actual building test data
 ```js
 var TestDataBuilder = require('loopback-testing').TestDataBuilder;
 var ref = TestDataBuilder.ref;
+var fixtures = require('./fixtures');
+TestDataBuilder.setfixtures(fixtures);
 
 // The context object to hold the created models.
 // You can use `this` in mocha test instead.
