@@ -154,6 +154,37 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+
+  it('create a list of devices', function(done) {
+    var Device = givenModel('Device', { 
+      type: { type: String, required: true },
+      model: { type: String, required: true } 
+    }, 'devices');
+    var ctx={};
+    new TestDataBuilder()
+      .defineList('devices', 3, Device)
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.devices.length).to.equal(3);
+        done();
+      }.bind(this));
+  });
+
+  it('create a list of devices from fixtures', function(done) {
+    var Device = givenModel('Device', { 
+      type: { type: String, required: true },
+      model: { type: String, required: true } 
+    }, 'devices');
+    var ctx={};
+    new TestDataBuilder()
+      .defineList('devices', 4, 'devices', 'generic')
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.devices.length).to.equal(4);
+        done();
+      }.bind(this));
+  });
+
   function createModels(){
     var Device = givenModel('Device', { 
       type: { type: String, required: true },
