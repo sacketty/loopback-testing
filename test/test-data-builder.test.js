@@ -2,7 +2,8 @@ var loopback = require('loopback');
 var TestDataBuilder = require('../lib/test-data-builder');
 var expect = require('chai').expect;
 var moment = require('moment');
-var fixtures = require('../lib/fixtures');
+var fixtures = require('./fixtures');
+TestDataBuilder.setfixtures(fixtures);
 
 describe('TestDataBuilder', function() {
   var db;
