@@ -170,11 +170,35 @@ var factory = {
         dev2: 2
       }
     }
+  },
+  inline: {
+    user: {
+      fixture: "users",
+      value: {
+        name: "Alan",
+        user: {
+          fixture: "books",
+          items: {
+            b1: {
+              data: {
+                title: "Begining of the end",
+                author: "John Foo"
+              },
+              quantity: 1
+            }
+          }
+        }
+      }
+    }
   }
+
 }
 
 module.exports = factory;
 ```
+`factory.inline` is an example of inline fixture creation as it implicitly create corresponding books and users fixtures.
+
+
 test/fixtures/index.js:
 ```js
 var app = require('../../server/server.js');

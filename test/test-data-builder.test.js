@@ -208,6 +208,20 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+  it('manages inline fixtures creation', function(done) {
+    var inline = fixtures.carts.inline;
+    createModels();   
+    var ctx={};
+    new TestDataBuilder()
+      .define('cart', 'carts', 'inline')
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.user.name).to.equal(inline.user.value.name);
+        expect(ctx.books).to.exist;
+        done();
+      }.bind(this));
+  });
+
   function createModels(){
     var Device = givenModel('Device', { 
       type: { type: String, required: true },
@@ -222,6 +236,11 @@ describe('TestDataBuilder', function() {
       userId: { type: Number, required: true },
       timeout: { type: Number}
     }, 'carts');    
+    var Book = givenModel('Book', { 
+      title: { type: String, required: true },
+      author: { type: String, required: true },
+      userId: { type: Number, required: true }
+    }, 'books');
     var Payment = givenModel('Payment', { 
       cardNumber: { type: String, required: true },
       cartId: { type: Number, required: true },
