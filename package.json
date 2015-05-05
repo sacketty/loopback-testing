@@ -19,7 +19,8 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "loopback": "^2.2.0"
+    "loopback": "^2.2.0",
+    "moment": "^2.10.2"
   },
   "license": {
     "name": "Dual MIT/StrongLoop",

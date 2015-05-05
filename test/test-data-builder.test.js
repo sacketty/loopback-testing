@@ -1,6 +1,7 @@
 var loopback = require('loopback');
 var TestDataBuilder = require('../lib/test-data-builder');
 var expect = require('chai').expect;
+var moment = require('moment');
 var fixtures = require('../lib/fixtures');
 
 describe('TestDataBuilder', function() {
@@ -148,6 +149,7 @@ describe('TestDataBuilder', function() {
         if(err) return done(err);
         expect(ctx.payment.cartId).to.equal(ctx.cart.id);
         expect(ctx.devices.length).to.equal(3);
+        expect(moment(ctx.payment.date).isSame(moment(), 'date'));
         done();
       }.bind(this));
   });
@@ -169,6 +171,7 @@ describe('TestDataBuilder', function() {
     var Payment = givenModel('Payment', { 
       cardNumber: { type: String, required: true },
       cartId: { type: Number, required: true },
+      date: {type: Date },
       amount: { type: Number, required: true }
     }, 'payments');    
   }

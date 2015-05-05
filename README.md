@@ -115,9 +115,9 @@ Here is how directory structure looks like:
 	-server.js
 +test
 	+fixtures
-		-users.json
-		-devices.json
-		-carts.json
+		-users.js
+		-devices.js
+		-carts.js
 		-index.js
 	+models
 		-devices.test.js
@@ -126,63 +126,68 @@ Here is how directory structure looks like:
 ```
 
 ### fixtures
-test/fixtures/users.json:
-```json
-{
-  "bob": {
-    "name": "Bob"
+test/fixtures/users.js:
+```js
+var factory = {
+  bob: {
+    name: "Bob"
   },
-  "alice": {
-  	"name": "Alice"
+  alice: {
+    name: "Alice"
   }
 }
+module.exports = factory;
 ```
-test/fixtures/devices.json:
+test/fixtures/devices.js:
 
-```json
-{
-  "dev1": {
-    "type": "phone",
-    "model": "iPhone6"
+```js
+var factory = {
+  dev1: {
+    type: "phone",
+    model: "iPhone6"
   },
-  "dev2": {
-  	"type": "tablet",
-  	"model": "GalaxyTab2"
+  dev2: {
+    type: "tablet",
+    model: "GalaxyTab2"
   }
 }
+
+module.exports = factory;
 ```
-test/fixtures/carts.json:
-```json
-{
-  "usercart": {
-    "session": "1111122222333333",
-    "user": {
-      "fixture": "users",
-      "value": "bob"
+test/fixtures/carts.js:
+```js
+var factory = {
+  usercart: {
+    session: "1111122222333333",
+    user: {
+      fixture: "users",
+      value: "bob"
     },
-    "cart": {
-      "fixture": "devices",
-      "items": {
-        "dev1": 1,
-        "dev2": 2
+    cart: {
+      fixture: "devices",
+      items: {
+        dev1: 1,
+        dev2: 2
       }
     }
   }
 }
+
+module.exports = factory;
 ```
-test/fixtures/users.js:
+test/fixtures/index.js:
 ```js
 var app = require('../../server/server.js');
 var _ = require('underscore');
 
-exports.users = require('./users.json');
-exports.devices = require('./devices.json');
-exports.carts = require('./carts.json');
+exports.users = require('./users');
+exports.devices = require('./devices');
+exports.carts = require('./carts');
 
 exports.map = {
-	"users": app.models.User,
-	"devices": app.models.Device,
-	"carts": app.models.Carts
+	users: app.models.User,
+	devices: app.models.Device,
+	carts: app.models.Carts
 }
 ```
 
@@ -190,7 +195,7 @@ exports.map = {
 
 *When using fixture, the node parent should refer to the foreignKey prefix.*
 
-*i.e. carts.json:*
+*i.e. carts.js:*
 
 *Cart Model has a 'hasMany' relation to device. So Device has a 'cartId' foreign key. the prefix is then 'cart'. That's why we have a "cart" instead of "devices" in the "usercart" fixture definition.*
 
