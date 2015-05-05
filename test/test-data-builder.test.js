@@ -44,6 +44,28 @@ describe('TestDataBuilder', function() {
     );
   }
 
+  // Parameterized test
+  function itAutoFillsRequiredPropertiesWithDefaultValuesFor(type, value) {
+    it(
+      'auto-fills required ' + type + ' properties with defaults values',
+      function(done) {
+        givenTestModel({
+          required: { type: type, required: true, default: value }
+        });
+
+        new TestDataBuilder()
+          .define('model', TestModel, {})
+          .buildTo(this, function(err) {
+            if (err) return done(err);
+            expect(this.model.required).to.equal(value);
+            done();
+          }.bind(this));
+      }
+    );
+  }
+
+  itAutoFillsRequiredPropertiesWithDefaultValuesFor(String, "defaut Value");
+  itAutoFillsRequiredPropertiesWithDefaultValuesFor(Number, 10);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(String);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(Number);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(Date);
