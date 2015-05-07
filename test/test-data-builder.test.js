@@ -223,39 +223,110 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+  it('manages polymorphic relations', function(done) {
+    createModels();   
+    var ctx={};
+    new TestDataBuilder()
+      .define('book', 'books', 'book1')
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        expect(ctx.comments.length).to.equal(2);
+        for(var i=0; i< ctx.comments.length; i++){
+          var comment = ctx.comments[i];
+          expect(comment.subjectId).to.equal(ctx.book.id);
+          expect(comment.subjectType).to.equal('Book');
+        }
+        done();
+      }.bind(this));
+  });
+
   function createModels(){
     var Device = givenModel('Device', { 
       type: { type: String, required: true },
-      model: { type: String, required: true },
-      cartId: { type: Number} 
+      model: { type: String, required: true }
+    }, {
+      relations: {
+        comments: {
+          type: "hasMany",
+          model: "Comment",
+          polymorphic: {
+            as: "subject"
+          }
+        },
+        cart: {
+          type: "belongsTo",
+          model: "Cart"
+        }
+      }
     }, 'devices');
     var User = givenModel('User', { 
       name: { type: String, required: true }
-    }, 'users');
+    },'users');
     var Cart = givenModel('Cart', { 
       session: { type: String, required: true },
-      userId: { type: Number, required: true },
       timeout: { type: Number}
+    },{
+      relations: {
+        user: {
+          type: "belongsTo",
+          model: "User"
+        }
+      }
     }, 'carts');    
     var Book = givenModel('Book', { 
       title: { type: String, required: true },
-      author: { type: String, required: true },
-      userId: { type: Number, required: true }
+      author: { type: String, required: true }
+    }, {
+      relations: {
+        user: {
+          type: "belongsTo",
+          model: "User"
+        },
+        comments: {
+          type: "hasMany",
+          model: "Comment",
+          polymorphic: {
+            as: "subject"
+          }
+        }
+      }      
     }, 'books');
     var Payment = givenModel('Payment', { 
       cardNumber: { type: String, required: true },
-      cartId: { type: Number, required: true },
       date: {type: Date },
       amount: { type: Number, required: true }
-    }, 'payments');    
+    },{
+      relations: {
+        cart: {
+          type: "belongsTo",
+          model: "Cart"
+        }
+      }
+    },'payments');
+    var Comment = givenModel('Comment',
+    {
+      text: {type: String, required: true}
+    },{
+      relations: {
+        subject: {
+          type: "belongsTo",
+          polymorphic: true
+        }
+      }
+    },
+    'comments');
   }
 
-  function givenTestModel(properties) {
-    TestModel = givenModel('TestModel', properties);
+  function givenTestModel(properties, options) {
+    TestModel = givenModel('TestModel', properties, options);
   }
 
-  function givenModel(name, properties, mapping) {
-    var ModelCtor = loopback.createModel(name, properties);
+  function givenModel(name, properties, options, mapping) {
+    if(!mapping){
+      mapping = options;
+      options = {};
+    }
+    var ModelCtor = loopback.createModel(name, properties, options);
     ModelCtor.attachTo(db);
     if(mapping){
       fixtures.map[mapping]=ModelCtor;
