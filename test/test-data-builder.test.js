@@ -25,6 +25,20 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+  it('builds a model with promise', function(done) {
+    givenTestModel({ value: String });
+
+    var context = {}
+    new TestDataBuilder()
+      .define('model', TestModel, { value: 'a-string-value' })
+      .qBuildTo(context)
+      .then(function(context){
+        expect(context.model).to.have.property('value', 'a-string-value');
+        done();
+      })
+      .then(null, function(err){ done(err) });
+  });
+
   // Parameterized test
   function itAutoFillsRequiredPropertiesWithUniqueValuesFor(type) {
     it(
