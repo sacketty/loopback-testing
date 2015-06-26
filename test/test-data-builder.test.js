@@ -80,6 +80,24 @@ describe('TestDataBuilder', function() {
       }
     );
   }
+  function itFillsRequiredPropertiesWithSpecificValuesFor(type, value, property) {
+    it(
+      'fills required ' + type + ' properties with specified values',
+      function(done) {
+        givenTestModel({
+          required: { type: type, required: true, default: value }
+        });
+
+        new TestDataBuilder()
+          .define('model', TestModel, {required: property})
+          .buildTo(this, function(err) {
+            if (err) return done(err);
+            expect(this.model.required).to.equal(property);
+            done();
+          }.bind(this));
+      }
+    );
+  }
 
   itAutoFillsRequiredPropertiesWithDefaultValuesFor(String, "defaut Value");
   itAutoFillsRequiredPropertiesWithDefaultValuesFor(Number, 0);
@@ -87,6 +105,9 @@ describe('TestDataBuilder', function() {
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(String);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(Number);
   itAutoFillsRequiredPropertiesWithUniqueValuesFor(Date);
+
+  itFillsRequiredPropertiesWithSpecificValuesFor(String, "default val", "My new value");
+  itFillsRequiredPropertiesWithSpecificValuesFor(Object, {val: "My Val"}, {obj: "My new object"});
 
   it('limits the length of the generated string value to the property length', function(done) {
     var testMaxStringLength = 10;
@@ -192,6 +213,19 @@ describe('TestDataBuilder', function() {
       }.bind(this));
   });
 
+  it('manage relations name collusion', function(done) {
+    createModels();
+    var ctx={};
+    new TestDataBuilder()
+      .define('payment1', 'payments', 'pm1')
+      .define('payment2', 'payments', 'pm2')
+      .buildTo(ctx, function(err) {
+        if(err) return done(err);
+        console.log('ctx = ',ctx)
+        expect(ctx.payment1.cartId).to.not.equal(ctx.payment2.cartId);
+        done();
+      }.bind(this));
+  });
 
   it('create a list of devices', function(done) {
     var Device = givenModel('Device', { 
